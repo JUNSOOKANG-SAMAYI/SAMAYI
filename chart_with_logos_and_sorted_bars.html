@@ -1,0 +1,206 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Bar Chart Race</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        svg {
+            width: 100%;
+            height: 500px;
+        }
+
+        .bar {
+            opacity: 0.8;
+        }
+
+        .bar:hover {
+            opacity: 1;
+        }
+
+        .axis text {
+            font-size: 12px;
+        }
+
+        .axis path,
+        .axis line {
+            shape-rendering: crispEdges;
+        }
+
+        .title {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .label {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .company-name {
+            font-size: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .company-logo {
+            width: 30px;
+            height: 30px;
+            vertical-align: middle;
+            border-radius: 50%;
+        }
+
+        .company-name-with-logo {
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+
+<h2 class="title">Stock Bar Chart Race (Samsung, TSMC, DB Hitek, KOSPI)</h2>
+<svg id="chart"></svg>
+
+<script>
+    const width = 800;
+    const height = 500;
+    const margin = { top: 20, right: 40, bottom: 60, left: 100 };
+
+    const svg = d3.select("#chart")
+        .attr("width", width)
+        .attr("height", height);
+
+    const x = d3.scaleLinear()
+        .range([margin.left, width - margin.right]);
+
+    const y = d3.scaleBand()
+        .range([margin.top, height - margin.bottom])
+        .padding(0.1);
+
+    const xAxis = svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(0,${height - margin.bottom})`);
+
+    const yAxis = svg.append("g")
+        .attr("class", "axis")
+        .attr("transform", `translate(${margin.left},0)`);
+
+    const yearLabel = svg.append("text")
+        .attr("class", "label")
+        .attr("x", width / 2)
+        .attr("y", margin.top - 10)
+        .attr("text-anchor", "middle")
+        .style("font-size", "20px")
+        .text("Year: 2010");
+
+    const data = [
+        { year: 2010, samsung: 90000, kospi: 1500, tsmc: 120000, db_hitek: 30000 },
+        { year: 2011, samsung: 105000, kospi: 1800, tsmc: 130000, db_hitek: 35000 },
+        { year: 2012, samsung: 120000, kospi: 1900, tsmc: 140000, db_hitek: 40000 },
+        { year: 2013, samsung: 140000, kospi: 2000, tsmc: 160000, db_hitek: 45000 },
+        { year: 2014, samsung: 160000, kospi: 2100, tsmc: 170000, db_hitek: 50000 },
+        { year: 2015, samsung: 170000, kospi: 2200, tsmc: 180000, db_hitek: 55000 },
+        { year: 2016, samsung: 185000, kospi: 2300, tsmc: 190000, db_hitek: 60000 },
+        { year: 2017, samsung: 200000, kospi: 2400, tsmc: 200000, db_hitek: 65000 },
+        { year: 2018, samsung: 210000, kospi: 2500, tsmc: 210000, db_hitek: 70000 },
+        { year: 2019, samsung: 220000, kospi: 2600, tsmc: 220000, db_hitek: 75000 },
+        { year: 2020, samsung: 250000, kospi: 2800, tsmc: 230000, db_hitek: 80000 },
+        { year: 2021, samsung: 270000, kospi: 3000, tsmc: 240000, db_hitek: 85000 },
+        { year: 2022, samsung: 290000, kospi: 3100, tsmc: 250000, db_hitek: 90000 },
+        { year: 2023, samsung: 320000, kospi: 3200, tsmc: 260000, db_hitek: 95000 },
+        { year: 2024, samsung: 340000, kospi: 3300, tsmc: 270000, db_hitek: 100000 },
+        { year: 2025, samsung: 350000, kospi: 3400, tsmc: 280000, db_hitek: 105000 },
+    ];
+
+    const logos = {
+        "Samsung Electronics": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Samsung_Logo.png",
+        "KOSPI": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c6/Kospi_logo.svg/1200px-Kospi_logo.svg.png",
+        "TSMC": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/TSMC_logo.svg/800px-TSMC_logo.svg.png",
+        "DB Hitek": "https://upload.wikimedia.org/wikipedia/commons/e/e6/DB_Hitek_logo.png"
+    };
+
+    function updateChart(yearIndex) {
+        // 시가총액 순으로 정렬
+        const currentData = [
+            { name: "Samsung Electronics", value: data[yearIndex].samsung, color: "blue" },
+            { name: "KOSPI", value: data[yearIndex].kospi, color: "yellow" },
+            { name: "TSMC", value: data[yearIndex].tsmc, color: "green" },
+            { name: "DB Hitek", value: data[yearIndex].db_hitek, color: "red" }
+        ];
+
+        // 시가총액 순으로 정렬
+        currentData.sort((a, b) => b.value - a.value);
+
+        // x, y 스케일 갱신
+        x.domain([0, d3.max(currentData, d => d.value) / 2]); // 막대 그래프 크기 줄이기
+        y.domain(currentData.map(d => d.name));
+
+        // Update year label
+        yearLabel.text(`Year: ${data[yearIndex].year}`);
+
+        // Update bars
+        const bars = svg.selectAll(".bar")
+            .data(currentData, d => d.name);
+
+        bars.enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", margin.left)
+            .attr("y", d => y(d.name))
+            .attr("width", 0)
+            .attr("height", y.bandwidth())
+            .attr("fill", d => d.color)
+            .merge(bars)
+            .transition()
+            .duration(1000)
+            .attr("width", d => x(d.value) - margin.left)
+            .attr("y", (d, i) => y(d.name));  // 막대 y 위치 동적으로 설정
+
+        bars.exit().remove();
+
+        // Update axes
+        xAxis.transition().duration(1000).call(d3.axisBottom(x).ticks(5).tickFormat(d3.format(".0s")));
+        yAxis.transition().duration(1000).call(d3.axisLeft(y));
+
+        // Update company names and logos
+        const labels = svg.selectAll(".company-name")
+            .data(currentData, d => d.name);
+
+        labels.enter().append("text")
+            .attr("class", "company-name")
+            .attr("x", margin.left - 70)
+            .attr("y", d => y(d.name) + y.bandwidth() / 2)
+            .attr("dy", ".35em")
+            .html(d => `<div class="company-name-with-logo">
+                            <img class="company-logo" src="${logos[d.name]}" alt="${d.name}">
+                            ${d.name}
+                        </div>`)
+            .merge(labels)
+            .transition()
+            .duration(1000)
+            .attr("x", margin.left - 70);
+
+        labels.exit().remove();
+    }
+
+    let yearIndex = 0;
+    updateChart(yearIndex);
+
+    // Update the chart every 1 second to simulate the race effect
+    setInterval(() => {
+        yearIndex = (yearIndex + 1) % data.length;
+        updateChart(yearIndex);
+    }, 1000);
+</script>
+
+</body>
+</html>
